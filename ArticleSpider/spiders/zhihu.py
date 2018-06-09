@@ -9,7 +9,7 @@ import re
 from urllib import parse
 from scrapy.item import Item
 from scrapy.loader import ItemLoader
-from ArticleSpider.items import ZhihuQuestionItem,ZhihuAnswerItme
+from items import ZhihuQuestionItem,ZhihuAnswerItme
 
 class ZhihuSpider(scrapy.Spider):
     name = 'zhihu'
@@ -53,9 +53,9 @@ class ZhihuSpider(scrapy.Spider):
         browser = webdriver.Chrome(executable_path='D:/chromedriver/chromedriver.exe')
         browser.get(url="https://www.zhihu.com/signin")
         time.sleep(3)
-        browser.find_element_by_css_selector('.SignFlow-accountInput input').send_keys('15884987552')
+        browser.find_element_by_css_selector('.SignFlow-accountInput input').send_keys('')
         time.sleep(1)
-        browser.find_element_by_css_selector('.SignFlow-password input').send_keys('Zhihu@060507')
+        browser.find_element_by_css_selector('.SignFlow-password input').send_keys('')
         time.sleep(1)
         browser.find_element_by_css_selector('.SignFlow-submitButton ').click()
         time.sleep(1)

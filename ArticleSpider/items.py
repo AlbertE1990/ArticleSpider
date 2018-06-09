@@ -9,8 +9,8 @@ import scrapy
 from scrapy.loader.processors import MapCompose,TakeFirst,Join
 from scrapy.loader import ItemLoader
 from datetime import datetime
-from ArticleSpider.utils.common import get_nums
-from ArticleSpider.settings import SQL_DATE_FORMAT,SQL_DATETIME_FORMAT
+from utils.common import get_nums
+from settings import SQL_DATE_FORMAT,SQL_DATETIME_FORMAT
 
 
 class ArticlespiderItem(scrapy.Item):
@@ -148,6 +148,25 @@ class ZhihuAnswerItme(scrapy.Item):
         crawl_update_time = datetime.now().strftime(SQL_DATETIME_FORMAT)
         params = (zhihu_id,url,question_id,content,parise_num,comments_num,create_time,update_time,crawl_time,crawl_update_time)
         return insert_sql,params
+
+
+class LagouJobItem(scrapy.Item):
+    title = scrapy.Field()
+    url = scrapy.Field()
+    url_object_id = scrapy.Field()
+    salary = scrapy.Field()
+    work_years = scrapy.Field()
+    degree_need = scrapy.Field()
+    job_type = scrapy.Field()
+    publish_time = scrapy.Field()
+    job_advantage = scrapy.Field()
+    job_desc = scrapy.Field()
+    job_addr = scrapy.Field()
+    company_name = scrapy.Field()
+    company_url = scrapy.Field()
+    tags = scrapy.Field()
+    crawl_time = scrapy.Field()
+    crawl_update_time = scrapy.Field()
 
 
 

@@ -9,6 +9,7 @@
 #     https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 import os
+import sys
 
 BOT_NAME = 'ArticleSpider'
 
@@ -80,6 +81,10 @@ IMAGES_STORE = os.path.join(project_dir,'images')
 IMAGES_MIN_HEIGHT = 100
 IMAGES_MIN_WIDTH = 100
 
+sys.path.insert(0,project_dir)
+
+
+
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
@@ -109,3 +114,4 @@ MYSQL_DBNAME = 'article_spider'
 
 SQL_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 SQL_DATE_FORMAT = '%Y-%m-%d'
+
