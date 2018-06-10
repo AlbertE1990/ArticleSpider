@@ -74,7 +74,7 @@ class JobboleSpider(scrapy.Spider):
         item_loader.add_css('praise_num','.post-adds .vote-post-up h10::text')
         item_loader.add_css('fav_num','.post-adds .bookmark-btn::text')#re
         item_loader.add_css('comment_num','a[href="#article-comment"] span::text')#re
-        item_loader.add_css('tags','.entry-meta .entry-meta-hide-on-mobile a::text')#处理函数
+        item_loader.add_css('tag','.entry-meta .entry-meta-hide-on-mobile a::text')#处理函数
         item_loader.add_css('content','.entry')
         item_loader.add_value('front_img_url',[front_img_url])
         item_loader.add_value('url', response.url)

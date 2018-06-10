@@ -4,6 +4,10 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 import time,json,os
 from selenium import webdriver
+from items import LagouJobItem,LagouJobItemLoader
+from utils.common import get_md5
+from datetime import datetime
+from settings import SQL_DATETIME_FORMAT
 
 
 class LagouSpider(CrawlSpider):
@@ -18,8 +22,8 @@ class LagouSpider(CrawlSpider):
 
     rules = (
         Rule(LinkExtractor(allow=r'zhaopin/.*'), callback='parse_job', follow=True),
-        Rule(LinkExtractor(allow=r'gongsi/j\d+/.html'), callback='parse_job', follow=True),
-        Rule(LinkExtractor(allow=r'jobs/\d+\.html'), callback='parse_job', follow=True)
+        Rule(LinkExtractor(allow=r'gongsi/j\d+/.html'), callback='', follow=True),
+        Rule(LinkExtractor(allow=r'jobs/\d+\.html'), callback='', follow=True)
     )
 
     def get_local_cookie(self):
@@ -51,7 +55,9 @@ class LagouSpider(CrawlSpider):
         browser = webdriver.Chrome(executable_path='D:/chromedriver/chromedriver.exe')
         browser.get(url="https://www.lagou.com/")
         time.sleep(3)
-        browser.find_element_by_css_selector('#changeCity_header .checkTips a.tab focus').click()
+        qg = browser.find_element_by_css_selector('#changeCityBox > p.checkTips > a')
+        print(qg)
+        browser.find_element_by_css_selector('#changeCityBox > p.checkTips > a').click()
         time.sleep(3)
         Cookies = browser.get_cookies()
         browser.quit()
@@ -71,12 +77,34 @@ class LagouSpider(CrawlSpider):
             cookie_dict = self.get_web_cookie()
             # 更新本地cookie
             self.update_local_cookie(cookie_dict)
-        return [scrapy.Request(url=self.start_urls[0], headers=self.header, dont_filter=True, cookies=cookie_dict)]
+        return [scrapy.Request(url=self.start_urls[0],headers=self.header,dont_filter=True, cookies=cookie_dict)]
 
 
     def parse_job(self, response):
-        i = {}
-        #i['domain_id'] = response.xpath('//input[@id="sid"]/@value').extract()
-        #i['name'] = response.xpath('//div[@id="name"]').extract()
-        #i['description'] = response.xpath('//div[@id="description"]').extract()
-        return i
+        item_loader = LagouJobItemLoader(item = LagouJobItem(),response=response)
+
+        item_loader.add_css('title','.job-name::attr("title")')
+        item_loader.add_value('url',response.url)
+        item_loader.add_value('url_object_id', get_md5(response.url))
+        item_loader.add_css('salary', '.job_request .salary::text')
+        item_loader.add_css('job_city', '.job_request > p:nth-child(1) > span:nth-child(2)::text')
+        item_loader.add_css('work_years', '.job_request > p:nth-child(1) > span:nth-child(3)::text')
+        item_loader.add_css('degree_need', '.job_request > p:nth-child(1) > span:nth-child(4)::text')
+        item_loader.add_css('job_type', '.job_request > p:nth-child(1) > span:nth-child(5)::text')
+        item_loader.add_css('publish_time', '.publish_time::text')
+        item_loader.add_css('tags', '.position-label .labels::text')
+        item_loader.add_css('job_advantage', '.job-advantage p::text')
+        item_loader.add_css('job_desc', '.job_bt div')
+        item_loader.add_css('job_addr', '.work_addr')
+        item_loader.add_css('company_name', '.b2::attr("alt")')
+        item_loader.add_css('company_url', '#job_company dt a::attr("href")')
+        item_loader.add_value('crawl_time', datetime.now().strftime(SQL_DATETIME_FORMAT))
+        job_item = item_loader.load_item()
+        return job_item
+
+
+
+
+
+
+

@@ -11,6 +11,7 @@ from scrapy.loader import ItemLoader
 from datetime import datetime
 from utils.common import get_nums
 from settings import SQL_DATE_FORMAT,SQL_DATETIME_FORMAT
+from w3lib.html import remove_tags
 
 
 class ArticlespiderItem(scrapy.Item):
@@ -43,6 +44,11 @@ def return_value(value):
     return value
 
 
+#去掉斜杠
+def remove_splash(value):
+    return value.replace('/','')
+
+
 class ArticleItemLoader(ItemLoader):
     #自定义itemLoader
     default_output_processor = TakeFirst()
@@ -54,7 +60,7 @@ class JobboleArticleItem(scrapy.Item):
         input_processor = MapCompose(date_conver)
     )
     praise_num = scrapy.Field(
-        input_processor=MapCompose(int)
+        input_processor = MapCompose(int)
     )
     fav_num = scrapy.Field(
         input_processor = MapCompose(get_nums)
@@ -67,7 +73,7 @@ class JobboleArticleItem(scrapy.Item):
     )
     front_img_path = scrapy.Field()
     url_object_id = scrapy.Field()
-    tags = scrapy.Field(
+    tag = scrapy.Field(
         output_processor = ProcessTag()
     )
     content = scrapy.Field()
@@ -149,24 +155,66 @@ class ZhihuAnswerItme(scrapy.Item):
         params = (zhihu_id,url,question_id,content,parise_num,comments_num,create_time,update_time,crawl_time,crawl_update_time)
         return insert_sql,params
 
+#处理工作地址
+def hadle_job_addr(value):
+    return value.replace("\n","").replace(' ','').replace('查看地图','')
+
+#处理发布时间
+def handle_publish_time(value):
+    return value.replace('  发布于拉勾网','')
+
 
 class LagouJobItem(scrapy.Item):
     title = scrapy.Field()
     url = scrapy.Field()
     url_object_id = scrapy.Field()
     salary = scrapy.Field()
-    work_years = scrapy.Field()
-    degree_need = scrapy.Field()
-    job_type = scrapy.Field()
+    work_years = scrapy.Field(
+        input_processor=MapCompose(remove_splash)
+    )
+    degree_need = scrapy.Field(
+        input_processor=MapCompose(remove_splash)
+    )
+    job_type = scrapy.Field(
+        input_processor=MapCompose(remove_splash)
+    )
+    job_city = scrapy.Field(
+        input_processor=MapCompose(remove_splash)
+    )
     publish_time = scrapy.Field()
     job_advantage = scrapy.Field()
     job_desc = scrapy.Field()
-    job_addr = scrapy.Field()
+    job_addr = scrapy.Field(
+        input_processor=MapCompose(remove_tags,hadle_job_addr)
+    )
     company_name = scrapy.Field()
     company_url = scrapy.Field()
-    tags = scrapy.Field()
+    tags = scrapy.Field(
+        input_processor=Join(',')
+    )
     crawl_time = scrapy.Field()
     crawl_update_time = scrapy.Field()
+
+    def get_insert_sql(self):
+        insert_sql = '''
+                       insert into lagou_job (title,url,url_object_id,salary,work_years,degree_need,job_type,job_city,publish_time,job_advantage,job_desc,job_addr,company_name,company_url,tags,crawl_time) 
+                       VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                   '''
+
+        params = (self['title'],self['url'],self['url_object_id'],self['salary'],self['work_years'],self['degree_need'],self['job_type'],self['job_city'],self['publish_time'],self['job_advantage'],self['job_desc'],self['job_addr'],self['company_name'],self['company_url'],self['tags'],self['crawl_time'])
+        return insert_sql, params
+
+
+class LagouJobItemLoader(ItemLoader):
+    default_output_processor = TakeFirst()
+
+
+if __name__ == '__main__':
+    pass
+
+
+
+
 
 
 
