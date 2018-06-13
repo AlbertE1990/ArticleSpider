@@ -7,102 +7,30 @@ import os
 import requests
 import re
 from urllib import parse
-from scrapy.item import Item
 from scrapy.loader import ItemLoader
 from items import ZhihuQuestionItem,ZhihuAnswerItme
+from settings import USER_AGENT
+from tools.zhihu_login import ZhihuLogin
 
 class ZhihuSpider(scrapy.Spider):
     name = 'zhihu'
     allowed_domains = ['www.zhihu.com']
     start_urls = ['https://www.zhihu.com/']
-    User_Agent = "User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36"
     header = {
-        "User-Agent": User_Agent
+        "User-Agent": USER_AGENT
     }
-    cookie_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cookies/'+name+'.txt')
+    #在此spider下面进行自定义设置
+    custom_settings = {
+        'COOKIES_ENABLED' : True
+    }
+
     # question的第一页answer的请求url
     start_answer_url = "https://www.zhihu.com/api/v4/questions/{0}/answers?sort_by=default&include=data%5B%2A%5D.is_normal%2Cis_sticky%2Ccollapsed_by%2Csuggest_edit%2Ccomment_count%2Ccollapsed_counts%2Creviewing_comments_count%2Ccan_comment%2Ccontent%2Ceditable_content%2Cvoteup_count%2Creshipment_settings%2Ccomment_permission%2Cmark_infos%2Ccreated_time%2Cupdated_time%2Crelationship.is_author%2Cvoting%2Cis_thanked%2Cis_nothelp%2Cupvoted_followees%3Bdata%5B%2A%5D.author.is_blocking%2Cis_blocked%2Cis_followed%2Cvoteup_count%2Cmessage_thread_token%2Cbadge%5B%3F%28type%3Dbest_answerer%29%5D.topics&limit={1}&offset={2}"
 
 
-    def get_local_cookie(self):
-        '''
-        从本地文件获取cookie
-        :return:
-        '''
-        if os.path.isfile(self.cookie_path):
-            with open(self.cookie_path,'r') as f :
-                cookie_dict = json.load(f)
-            return cookie_dict
-        else:
-            return False
-
-    def update_local_cookie(self,cookie_dict):
-        '''
-        更新本地cookie
-        :param cookie_dict: 获取到的最新cookie_dict
-        :return:
-        '''
-        with open(self.cookie_path,'w') as f:
-            json.dump(cookie_dict,f)
-
-    def get_web_cookie(self):
-        '''
-        登录网址获取cookie
-        :return:
-        '''
-        browser = webdriver.Chrome(executable_path='D:/chromedriver/chromedriver.exe')
-        browser.get(url="https://www.zhihu.com/signin")
-        time.sleep(3)
-        browser.find_element_by_css_selector('.SignFlow-accountInput input').send_keys('')
-        time.sleep(1)
-        browser.find_element_by_css_selector('.SignFlow-password input').send_keys('')
-        time.sleep(1)
-        browser.find_element_by_css_selector('.SignFlow-submitButton ').click()
-        time.sleep(1)
-        Cookies = browser.get_cookies()
-        with open('zhihu_cookies', 'w') as f:
-            f.write(json.dumps(Cookies))
-        cookie_dict = {}
-        for cookie in Cookies:
-            cookie_dict[cookie['name']] = cookie['value']
-        return cookie_dict
-
-    #检查是否登录成功
-    # def is_login(self,):
-    #     url = 'https://www.zhihu.com/inbox'
-    #     cookie_dict = self.get_local_cookie()
-    #     # respons = scrapy.Request(url=self.start_urls[0],headers=self.header,dont_filter=True,cookies=cookie_dict)
-    #     res = requests.get(url=url,headers=self.header,cookies=cookie_dict,allow_redirects=False)
-    #     if res.status_code == 200:
-    #         return True
-
-    #检查本地cookie是否有用#
-    #检查本地cookie是否有用
-
-    def check_local_cookie(self):
-        '''
-        检查本地cookie是否有用
-        :return:
-        '''
-        url = 'https://www.zhihu.com/inbox'
-        cookie_dict = self.get_local_cookie()
-        if not cookie_dict:
-            return False
-        # respons = scrapy.Request(url=self.start_urls[0],headers=self.header,dont_filter=True,cookies=cookie_dict)
-        res = requests.get(url=url, headers=self.header, cookies=cookie_dict, allow_redirects=False)
-        print(res.status_code)
-        if res.status_code == 200:
-            return True
-
     def start_requests(self):
-        #从本地文件获取cookie
-        cookie_dict = self.get_local_cookie()
-        #检验本地cookie是否能够登录
-        if not self.check_local_cookie():
-            #登录不成功重新用账号密码登录获取cookie
-            cookie_dict = self.get_web_cookie()
-            #更新本地cookie
-            self.update_local_cookie(cookie_dict)
+        zhihulogin = ZhihuLogin()
+        cookie_dict = zhihulogin.get_cookie()
         return [scrapy.Request(url=self.start_urls[0],headers=self.header,dont_filter=True,cookies=cookie_dict)]
 
     def parse(self, response):

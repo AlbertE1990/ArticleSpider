@@ -18,7 +18,7 @@ NEWSPIDER_MODULE = 'ArticleSpider.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36"
+USER_AGENT = "User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36"
 
 RANDOM_UA_TYPE = 'random'
 # Obey robots.txt rules
@@ -30,13 +30,13 @@ ROBOTSTXT_OBEY = False
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-#DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 3
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
-COOKIES_ENABLED = True
+COOKIES_ENABLED = False
 
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False
@@ -56,10 +56,11 @@ COOKIES_ENABLED = True
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-   'ArticleSpider.middlewares.ArticlespiderDownloaderMiddleware': 543,
-    'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
-    'ArticleSpider.middlewares.RandomUserAgentMiddleware': 400,
+   # 'ArticleSpider.middlewares.ArticlespiderDownloaderMiddleware': 543,
+   #  'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
+   #  'ArticleSpider.middlewares.RandomUserAgentMiddleware': 400,
     # 'ArticleSpider.middlewares.RandomProxyMiddleware':399
+    # 'ArticleSpider.middlewares.JSPageMiddleware':399
 }
 
 # Enable or disable extensions
@@ -76,7 +77,7 @@ ITEM_PIPELINES = {
     # 'scrapy.pipelines.images.ImagesPipeline':1,
     # 'ArticleSpider.pipelines.ArticleImagePipeline': 1,
     # 'ArticleSpider.pipelines.MysqlPipeline':1，
-    'ArticleSpider.pipelines.MysqlTwistedPipline':1
+    # 'ArticleSpider.pipelines.MysqlTwistedPipline':1
 }
 IMAGES_URLS_FIELD = 'front_img_url'
 project_dir = os.path.abspath(os.path.dirname(__file__))
@@ -88,11 +89,9 @@ IMAGES_MIN_WIDTH = 100
 sys.path.insert(0,project_dir)
 
 
-
-
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
-#AUTOTHROTTLE_ENABLED = True
+AUTOTHROTTLE_ENABLED = True
 # The initial download delay
 #AUTOTHROTTLE_START_DELAY = 5
 # The maximum download delay to be set in case of high latencies
@@ -118,4 +117,6 @@ MYSQL_DBNAME = 'article_spider'
 
 SQL_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 SQL_DATE_FORMAT = '%Y-%m-%d'
+
+CHROMEDRIVER_PATH = 'D:/chromedriver/chromedriver.exe'
 

@@ -11,9 +11,9 @@ class JobboleSpider(scrapy.Spider):
     allowed_domains = ['blog.jobbole.com']
     start_urls = ['http://blog.jobbole.com/all-posts/']
 
+
     def parse(self, response):
         post_nodes = response.css("#archive .post-thumb a")
-
         for post_node in post_nodes:
             img_url = post_node.css("img::attr(src)").extract_first('')
             post_url = post_node.css("::attr(href)").extract_first('')

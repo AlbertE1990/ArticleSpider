@@ -8,6 +8,8 @@
 from scrapy import signals
 from fake_useragent import UserAgent
 from tools.crawl_xici import XiciIP
+from selenium import webdriver
+from scrapy.http import HtmlResponse
 
 
 class ArticlespiderSpiderMiddleware(object):
@@ -124,7 +126,22 @@ class RandomUserAgentMiddleware(object):
         request.headers.setdefault('User-Agent',get_ua())
 
 
-class RandomProxyMiddleware(object):
-    def process_request(self, request, spider):
-        xici = XiciIP()
-        request.meta['proxy'] = xici.get_random_ip()
+# class RandomProxyMiddleware(object):
+#     def process_request(self, request, spider):
+#         xici = XiciIP()
+#         request.meta['proxy'] = xici.get_random_ip()
+
+
+class JSPageMiddleware(object):
+    def __init__(self):
+        chrome_options = webdriver.ChromeOptions()
+        #启用无界面模式
+        # chrome_options.add_argument('--headless')
+        # chrome_options.add_argument('--disable-gpu')
+        self.browser = webdriver.Chrome(chrome_options=chrome_options,executable_path='D:/chromedriver/chromedriver.exe')
+    def process_request(self,request,spider):
+        if spider.name == 'jobbole':
+
+            self.browser.get(request.url)
+            print('访问{0}成功！'.format(request.url))
+            return HtmlResponse(url=self.browser.current_url,body=self.browser.page_source,encoding='utf-8',request=request)
